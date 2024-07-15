@@ -1,15 +1,20 @@
 package src.entity;
 
+import java.awt.Color;
 // import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 // import java.nio.Buffer;
+import java.nio.Buffer;
 
 import javax.imageio.ImageIO;
+import javax.swing.text.Utilities;
+
 import src.main.GamePanel;
 import src.main.KeyHandler;
+import src.main.UtilityTool;
 
 public class Player extends Entity{
     
@@ -17,9 +22,10 @@ public class Player extends Entity{
     KeyHandler keyH;
     public final int screenX;
     public final int screenY;
-    public int hasKey = 0;
+    // public int hasKey = 0;
+    int standCounter = 0;
 
-    int counter2 = 0;
+    // int counter2 = 0;
 
     public Player(GamePanel gp, KeyHandler keyH) {
 
@@ -42,30 +48,37 @@ public class Player extends Entity{
     }
     public void setDefaultValues() {
 
-        worldX = gp.tileSize * 26;
-        worldY = gp.tileSize * 26; 
+        worldX = gp.tileSize * 23;
+        worldY = gp.tileSize * 21; 
         speed = 4;
         direction = "down";
     }
     public void getPlayerImage() {
 
+        up1 = setup("boy_up_1");
+        up2 = setup("boy_up_2");
+        down1 = setup("boy_down_1");
+        down2 = setup("boy_down_2");
+        left1 = setup("boy_left_1");
+        left2 = setup("boy_left_2");
+        right1 = setup("boy_right_1");
+        right2 = setup("boy_right_2");
+    }
+
+    public BufferedImage setup(String imageName) {
+
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage image = null;
+
         try {
-
-            up1 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_up_1.png"));
-            up2 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_up_2.png"));
-            down1 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_down_1.png"));
-            down2 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_down_2.png"));
-            left1 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_left_1.png"));
-            left2 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_left_2.png"));
-            right1 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_right_1.png"));
-            right2 = ImageIO.read(getClass().getResourceAsStream("/res/player/boy_right_2.png"));
-
+            image = ImageIO.read(getClass().getResourceAsStream("/res/player/" + imageName + ".png"));
+            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
 
         }catch(IOException e) {
             e.printStackTrace();
         }
+        return image;
     }
-
     public void update() {
 
         if(keyH.upPressed == true || keyH.downPressed == true || 
@@ -114,45 +127,20 @@ public class Player extends Entity{
                 spriteCounter = 0;
             }
         }
+        else {
+            standCounter++;
+
+            if(standCounter == 20) {
+                spriteNum = 1;
+                standCounter = 0;
+            }
+            
+        }
     }
     public void pickUpObject(int i) {
 
         if(i != 999) {
 
-            String objectName = gp.obj[i].name;
-
-            switch(objectName) {
-                case "Key":
-                gp.playSE(1);
-                hasKey++;
-                gp.obj[i] = null;
-                gp.ui.showMessage("You got a key!");
-
-                break;
-                case "Door":
-                if(hasKey > 0) {
-                    gp.playSE(3);
-                    gp.obj[i] = null;
-                    hasKey--;
-                    gp.ui.showMessage("You opened a Door!");
-                }
-                else {
-                    gp.ui.showMessage("You need a key!");
-                }
-                System.out.println("Key:"+hasKey);
-                break;
-                case "Boots":
-                gp.playSE(2);;
-                speed += 2;
-                gp.obj[i] = null;
-                gp.ui.showMessage("Speed Up!");
-                break;
-                case "Chest":
-                gp.ui.gameFinished = true;
-                gp.stopMusic();
-                gp.playSE(4);
-                break;
-            }
         }
     }
 
@@ -197,8 +185,8 @@ public class Player extends Entity{
             }
             break;
         }
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize,null);
-
+        g2.drawImage(image, screenX, screenY,null);
+        // g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
     }
 }
 
